@@ -1,0 +1,6 @@
+Problem:
+    Sense: MIN;
+    Fun: c1: 3; c2: 2;
+    Constraint: c1: 2; c2: 1; c3: 4; sign: "gte";
+    Constraint: c1: -1; c2: 4; c3: 3; sign: "gte";
+    Constraint: c1: 1; c2: 4; c3: 16; sign: "lwe";
