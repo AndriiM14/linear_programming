@@ -7,7 +7,8 @@ def main() -> None:
         raise Exception("No file provided")
 
     model = parse_model(argv[1])
-    print(model)
+    model.solve()
+    model.print_optimal()
 
 
 if __name__ == "__main__":

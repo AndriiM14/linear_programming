@@ -16,7 +16,7 @@ class ParsingConsts:
         "MAX": LpMaximize
     }
 
-    SignTranslator = {
+    StrEnumSigns = {
         "gt": Signs.GT,
         "gte": Signs.GTE,
         "lw": Signs.LW,
@@ -26,7 +26,7 @@ class ParsingConsts:
 
     @staticmethod
     def from_str_to_sign(sign: str) -> Signs:
-        return ParsingConsts.SignTranslator[sign]
+        return ParsingConsts.StrEnumSigns[sign]
 
     class ExpressionTokens(Enum):
         C1 = "c1:"
