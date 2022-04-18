@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
 from pulp import LpMaximize, LpMinimize, LpProblem, LpVariable, LpStatusOptimal, get_solver
+from matplotlib import pyplot as plt
 from consts import Signs
+import numpy as np
 
 
 @dataclass
@@ -10,7 +12,7 @@ class Expression:
     c3: int = None
     sign: Signs = None
 
-    def sign_expression(self, x1: LpVariable, x2: LpVariable):
+    def sign_expression(self, x1, x2):
         if self.sign == Signs.GT:
             return self.c1 * x1 + self.c2 * x2 > self.c3
         elif self.sign == Signs.GTE:
@@ -55,7 +57,7 @@ class Model:
             if self.x2 is None:
                 self.x2 = LpVariable(name="x2", lowBound=0)
 
-            self.problem += self.obj_fun.c1 * self.x1 + self.obj_fun.c2 * self.x2
+            self.problem += self.obj_fun.c1 * self.x1 + self.obj_fun.c2 * self.x2 + self.obj_fun.c3
 
             for constraint in self.constraints:
                 self.problem += constraint.sign_expression(self.x1, self.x2)
@@ -69,6 +71,50 @@ class Model:
 
         print(f"Optimal value is: {self.problem.objective.value()}")
         print(f"x1: {self.x1.value()}; x2: {self.x2.value()}")
+
+    def draw_solution(self):
+        if not self._check_if_optimal():
+            print("Problem wasn't solved: call Model.solve method or it doesn't have optimal solution")
+            return
+
+        plt.figure()
+
+        plt.title("Feasible region:")
+        plt.xlabel("x1")
+        plt.ylabel("x2")
+        plt.grid()
+
+        lim = int(max(map(lambda c: c.c3, self.constraints)) / 2)
+
+        plt.xlim(0, lim)
+        plt.ylim(0, lim)
+
+        x1 = np.linspace(-1, lim, 2000)
+
+        constr_n = len(self.constraints)
+        d = np.linspace(0, lim, 300)
+        ax1, ax2 = np.meshgrid(d, d)
+
+        area = self.constraints[0].sign_expression(ax1, ax2)
+        for i in range(1, constr_n):
+            area &= self.constraints[i].sign_expression(ax1, ax2)
+
+        plt.imshow(
+            (area).astype(int),
+            extent=(ax1.min(), ax1.max(), ax2.min(), ax2.max()),
+            origin="lower",
+            cmap="Greens",
+            alpha=0.3
+        )
+
+        for i, constr in enumerate(self.constraints):
+            plt.plot(x1, (constr.c3 - constr.c1 * x1) / constr.c2, label=f"Constraint {i+1}")
+
+        plt.plot(x1, (self.problem.objective.value() - self.obj_fun.c1 * x1 - self.obj_fun.c3) / self.obj_fun.c2, label="Objective func")
+        plt.plot(self.x1.value(), self.x2.value(), marker='o')
+        plt.annotate(f"  Optimal Value ({self.x1.value()}; {self.x2.value()})", (self.x1.value(), self.x2.value()))
+        plt.legend()
+        plt.show()
 
     def _check_if_optimal(self) -> bool:
         return self.problem and self.problem.status == LpStatusOptimal

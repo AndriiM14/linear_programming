@@ -9,6 +9,7 @@ def main() -> None:
     model = parse_model(argv[1])
     model.solve()
     model.print_optimal()
+    model.draw_solution()
 
 
 if __name__ == "__main__":
