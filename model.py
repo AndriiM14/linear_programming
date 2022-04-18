@@ -1,3 +1,6 @@
+"""
+Module with Model API realization
+"""
 from dataclasses import dataclass, field
 from pulp import LpMaximize, LpMinimize, LpProblem, LpVariable, LpStatusOptimal, get_solver
 from matplotlib import pyplot as plt
@@ -7,12 +10,22 @@ import numpy as np
 
 @dataclass
 class Expression:
+    """
+    Class of the Expression.
+    Expression can be objective function or inequality for the constraint
+    """
     c1: int = None
     c2: int = None
     c3: int = None
     sign: Signs = None
 
     def sign_expression(self, x1, x2):
+        """
+        Forming statement of inequality
+        :param x1: linear problem variable x1
+        :param x2: linear problem variable x2
+        :return: returns expression statement with the sign character
+        """
         if self.sign == Signs.GT:
             return self.c1 * x1 + self.c2 * x2 > self.c3
         elif self.sign == Signs.GTE:
@@ -25,6 +38,11 @@ class Expression:
             return self.c1 * x1 + self.c2 * x2 == self.c3
 
     def __str__(self):
+        """
+        Forming string representation of the expression;
+        Format: c1 <number>; c2: <number>; c3: <number>; "sign": <sign string>;
+        :return: returns string representation of the expression
+        """
         res = ""
 
         res += f"c1: {self.c1}; "
@@ -32,7 +50,6 @@ class Expression:
 
         if self.c3:
             res += f"c3: {self.c3}; "
-
         if self.sign:
             res += f"sign: {self.sign}"
 
@@ -41,6 +58,11 @@ class Expression:
 
 @dataclass
 class Model:
+    """
+    Class of the Model.
+    Model contains data that defines linear programming problem.
+    And has methods for solving and displaying graphical solution of the problem.
+    """
     sense: LpMaximize | LpMinimize = None
     obj_fun: Expression = None
     constraints: list[Expression] = field(default_factory=lambda: [])
@@ -49,6 +71,10 @@ class Model:
     x2: LpVariable = None
 
     def solve(self) -> None:
+        """
+        Function that using pulp+glpk to solve lp problem
+        :return: None
+        """
         if self.problem is None:
             self.problem = LpProblem("Optimization_problem", sense=self.sense)
 
@@ -65,6 +91,10 @@ class Model:
         self.problem.solve(solver=get_solver("GLPK_CMD", msg=False))
 
     def print_optimal(self) -> None:
+        """
+        Prints optimal solution(if it's founded) to the terminal
+        :return: None
+        """
         if not self._check_if_optimal():
             print("Problem wasn't solved: call Model.solve method or it doesn't have optimal solution")
             return
@@ -72,7 +102,11 @@ class Model:
         print(f"Optimal value is: {self.problem.objective.value()}")
         print(f"x1: {self.x1.value()}; x2: {self.x2.value()}")
 
-    def draw_solution(self):
+    def draw_solution(self) -> None:
+        """
+        Draws feasible region, optimal solution(if it's found), objective function
+        :return: None
+        """
         if not self._check_if_optimal():
             print("Problem wasn't solved: call Model.solve method or it doesn't have optimal solution")
             return
@@ -110,15 +144,27 @@ class Model:
         for i, constr in enumerate(self.constraints):
             plt.plot(x1, (constr.c3 - constr.c1 * x1) / constr.c2, label=f"Constraint {i+1}")
 
-        plt.plot(x1, (self.problem.objective.value() - self.obj_fun.c1 * x1 - self.obj_fun.c3) / self.obj_fun.c2, label="Objective func")
+        plt.plot(
+            x1,
+            (self.problem.objective.value() - self.obj_fun.c1 * x1 - self.obj_fun.c3) / self.obj_fun.c2,
+            label="Objective func"
+        )
         plt.plot(self.x1.value(), self.x2.value(), marker='o')
         plt.annotate(f"  Optimal Value ({self.x1.value()}; {self.x2.value()})", (self.x1.value(), self.x2.value()))
         plt.legend()
         plt.show()
 
     def _check_if_optimal(self) -> bool:
+        """
+        Checking if optimal solution were found
+        :return: returns True if optimal solution were found
+        """
         return self.problem and self.problem.status == LpStatusOptimal
 
     def __str__(self) -> str:
+        """
+        Forming string representation of the Model;
+        :return: returns string representation of the Model;
+        """
         constraints_str = "\n\t\t- ".join(map(lambda constraint: str(constraint), self.constraints))
         return f"Model:\n\tSense: {self.sense} \n\tFun: {self.obj_fun} \n\tConstraints:\n\t\t- {constraints_str}"
