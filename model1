@@ -1,7 +1,8 @@
 Problem:
-    Sense: MIN;
-    Fun: c1: 4; c2: 5; c3: -15;
-    Constraint: c1: 5; c2: 3; c3: 23; sign: "gte";
-    Constraint: c1: 1; c2: 5; c3: 31; sign: "lwe";
-    Constraint: c1: 3; c2: -1; c3: 13; sign: "lwe";
-    Constraint: c1: 1; c2: -2; c3: 2; sign: "lwe";
+    Sense: MAX;
+    Fun: c1: 5; c2: -2; c3: 0;
+    Constraint: c1: 5; c2: 2; c3: 10; sign: "gte";
+    Constraint: c1: 2; c2: 5; c3: 10; sign: "gte";
+    Constraint: c1: -2; c2: 1; c3: 4; sign: "lwe";
+    Constraint: c1: 1; c2: 0; c3: 6; sign: "lwe";
+    Constraint: c1: 0; c2: 1; c3: 6; sign: "lwe";

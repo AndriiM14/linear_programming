@@ -118,10 +118,10 @@ class Model:
         plt.ylabel("x2")
         plt.grid()
 
-        lim = int(max(map(lambda c: c.c3, self.constraints)) / 2)
+        lim = int(100)
 
-        plt.xlim(0, lim)
-        plt.ylim(0, lim)
+        plt.xlim(-1, lim)
+        plt.ylim(-1, lim)
 
         x1 = np.linspace(-1, lim, 2000)
 
@@ -142,7 +142,10 @@ class Model:
         )
 
         for i, constr in enumerate(self.constraints):
-            plt.plot(x1, (constr.c3 - constr.c1 * x1) / constr.c2, label=f"Constraint {i+1}")
+            if constr.c2 != 0:
+                plt.plot(x1, (constr.c3 - constr.c1 * x1) / constr.c2, label=f"Constraint {i+1}")
+            else:
+                plt.plot(x1, (constr.c3 - constr.c2 * x1) / constr.c1, label=f"Constraint {i+1}")
 
         plt.plot(
             x1,
