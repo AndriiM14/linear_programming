@@ -1,5 +1,6 @@
 from sys import argv
 from parser import parse_model
+from solvers import simplex_solver
 
 
 def main() -> None:
@@ -7,9 +8,7 @@ def main() -> None:
         raise Exception("No file provided")
 
     model = parse_model(argv[1])
-    model.solve()
-    model.print_optimal()
-    model.draw_solution()
+    simplex_solver(model)
 
 
 if __name__ == "__main__":
